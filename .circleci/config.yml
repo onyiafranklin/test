@@ -11,19 +11,34 @@ jobs:
           # Specify the execution environment. You can specify an image from Dockerhub or use one of our Convenience Images from CircleCI's Developer Hub.
     # See: https://circleci.com/docs/2.0/configuration-reference/#docker-machine-macos-windows-executor
     docker:
-      - image: python:3.7-alpine3.11
+      - image: cimg/node:17.0
     # Add steps to the job
     # See: https://circleci.com/docs/2.0/configuration-reference/#steps
    
     steps: 
       - checkout
-      - run :
-            command: |
-                apk add --update  nodejs npm
       - run: npm install
       - run: npm run lint
+  test:
+    docker:
+      - image: cimg/node:17.0
+    steps:
+      - checkout
+      - run: npm i
+      - run: npm run test
+  analyze:
+    docker:
+      - image: cimg/node:17.0
+    steps:
+      - checkout
+      - run: npm audit    
 workflows:
   my_workflow:
     jobs:
-      - build      
- 
+      - build
+      - test:
+          requires:
+            - build
+      - analyze:
+          requires:
+            - test
